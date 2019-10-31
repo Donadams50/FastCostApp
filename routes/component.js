@@ -18,12 +18,18 @@ var mysqlConnection = mysql.createConnection({
        req.user[0]
     );
 });
+
+// Function to create a component
+
+
+
+
 // to add component to repo
-router.post('/component', passport.authenticate('jwt', { session: false}),  (req, res) =>{
+router.post('/component',   (req, res) =>{
   //console.log(req.user)
      console.log(JSON.stringify(req.user));
 
-if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
+// if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
      ComponentDescription= req.body.ComponentDescription;
      ComponentName= req.body.ComponentName;
      NoOfItems = req.body.NoOfItems
@@ -48,7 +54,7 @@ mysqlConnection.query("insert into componenttemplate ( ComponentName, ComponentD
       SellerWeblink = Item[j].SellerWeblink;
       date = Item[j].date;
       mysqlConnection.query("insert into componentitemtemplate ( Item_Id, ItemName, ItemDescription,Image, PrefferedPrice, DealersAddress, DealerPhone, City, SellerWeblink, date, component_Id) values ('"+Item_Id+"','"+ItemName+"', '"+ItemDescription+"', '"+Image+"', '"+PrefferedPrice+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+City+"', '"+SellerWeblink+"', '"+date+"', '"+component_Id+"')", function(err,results,fields){
-    
+
         if (!err){
           console.log("Succesfully inserted " );
         
@@ -69,24 +75,25 @@ mysqlConnection.query("insert into componenttemplate ( ComponentName, ComponentD
    
 
 
-} else{
-  console.log("you do not have permission to perform this operation");
+// } else{
+//   console.log("you do not have permission to perform this operation");
      
-     }
+//      }
 });
 // to get all component from repo
-router.get('/components',  passport.authenticate('jwt', { session: false}), (req, res) =>{
+router.get('/components',  (req, res) =>{
   //console.log(req.user) 
  console.log(JSON.stringify(req.user));
 
- if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 2){
+//  if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 2){
  name = req.query.ComponentName;
-
+console.log("ddd")
 if(!name){
   mysqlConnection.query('SELECT * FROM componenttemplate ', function(err,results,fields){
       
       if (!err){
         console.log(results);
+        console.log("ffff");
           res.status(201)
                  return res.json(results);
           }
@@ -95,8 +102,8 @@ if(!name){
       }
       
       });
-} else{
-  mysqlConnection.query('SELECT * FROM componenttemplate where ComponentName = ? ',[name],function(err,results,fields){
+} else{     
+  mysqlConnection.query('SELECT * FROM componenttemplate where ComponentName like ? ',["%"+ name +"%"],function(err,results,fields){
       
       if (!err){
         console.log(results);
@@ -111,16 +118,17 @@ if(!name){
 }
            
                               
- } else{
-    console.log("you do not have permission to perform this operation")
-       }
+//  } else{
+//     console.log("you do not have permission to perform this operation")
+//        }
 
 });
-router.get('/component/:component_Id', passport.authenticate('jwt', { session: false}),  (req, res) =>{
+// to get the all items in a componenets 
+router.get('/component/items/:component_Id', (req, res) =>{
   //console.log(req.user)
   
  console.log(JSON.stringify(req.user)); 
-if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){  
+// if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){  
   mysqlConnection.query('SELECT * FROM componentitemtemplate WHERE  component_Id =?',[req.params.component_Id], function(err, results, response){
       if (!err){
       res.status(201)
@@ -136,9 +144,66 @@ if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id =
       });  
     
                               
-} else{
-  console.log("you do not have permission to perform this operation")
-     }
+// } else{
+//   console.log("you do not have permission to perform this operation")
+//      }
+
+});
+// to edit items in a component
+router.put('/component/items/:component_Id', (req, res) =>{
+  //console.log(req.user)
+  
+ console.log(JSON.stringify(req.user)); 
+// if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){  
+  mysqlConnection.query('SELECT * FROM componentitemtemplate WHERE  component_Id =?',[req.params.component_Id], function(err, results, response){
+      if (!err){
+      res.status(201)
+     console.log(results)
+        return res.json(
+     results
+   );
+            }
+      else{
+        console.log(err);
+      }
+     
+      });  
+    
+                              
+// } else{
+//   console.log("you do not have permission to perform this operation")
+//      }
+
+});
+
+
+
+
+
+// to get the details of a componenet
+router.get('/component/:component_Id',   (req, res) =>{
+  //console.log(req.user)
+  
+ console.log(JSON.stringify(req.user)); 
+// if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){  
+  mysqlConnection.query('SELECT * FROM componenttemplate WHERE  Id =?',[req.params.component_Id], function(err, results, response){
+      if (!err){
+      res.status(201)
+     console.log(results)
+        return res.json(
+     results
+   );
+            }
+      else{
+        console.log(err);
+      }
+     
+      });  
+    
+                              
+// } else{
+//   console.log("you do not have permission to perform this operation")
+//      }
 
 });
 
