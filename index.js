@@ -86,7 +86,55 @@ var mysqlConnection = mysql.createConnection({
     
     }
 
+// Function to get all category
+async function GetCategories(){
+    const mysql2= require('mysql2/promise');
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    try{ 
+        const result = await connection.execute('SELECT category FROM category')
+        console.log("gotten succesfullly")
+        console.log(result[0])
+        data= result[0]
+        return data
+    }catch (err) {
+          
+        console.log(err)
+        return err
+        } 
+    
+}
 
+
+
+//..................................................//
+
+// End point to get the number of all items, all componenets, all projects, all users
+app.get('/categories',   (req, res) =>{
+        
+    GetCategories()
+    .then(data => {
+       if (data.length>0){
+          console.log("gotten succesfully");
+          const result = data;
+          res.status(200)
+           res.json({
+               success:true,
+               result
+           })
+         
+       }else{
+           res.status(400)
+           res.json({
+               success:false,
+               message:"item not gotten"
+           })
+       }
+   });
+
+    });
+
+
+ 
     
 // End point to get the number of all items, all componenets, all projects, all users
  app.get('/all',   (req, res) =>{
@@ -104,47 +152,6 @@ var mysqlConnection = mysql.createConnection({
            })
        }
    });
-//    GetNoOfComponents()
-//    .then(data => {
-//       if (data.length>0){
-//          console.log("gotten succesfully");
-//          return res.json(data[0]);
-//       }else{
-//           res.status(400)
-//           res.json({
-//               success:false,
-//               message:"item not gotten"
-//           })
-//       }
-//   });
-//   GetNoOfItems()
-//     .then(data => {
-//        if (data.length>0){
-//           console.log("gotten succesfully");
-//           return res.json(data[0]);
-//        }else{
-//            res.status(400)
-//            res.json({
-//                success:false,
-//                message:"item not gotten"
-//            })
-//        }
-//    });
-
- 
-//    GetNoOfItems()
-//     .then(data => {
-//        if (data.length>0){
-//           console.log("gotten succesfully");
-//           return res.json(data[0]);
-//        }else{
-//            res.status(400)
-//            res.json({
-//                success:false,
-//                message:"item not gotten"
-//            })
-//        }
-//    });
 
     });
 

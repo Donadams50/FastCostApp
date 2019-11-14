@@ -31,6 +31,47 @@ var mysqlConnection = mysql.createConnection({
         } 
     
 }
+
+// Function to add category
+async function AddCategory( Item_Id, Category_Id){
+    const mysql2= require('mysql2/promise');
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    try{ 
+        const result = await  connection.execute("insert into itemcategory (Item_Id, Category_Id ) values ('"+Item_Id+"','"+Category_Id+"')")
+        console.log("item inserted with")
+        console.log(result[0].insertId)
+        data= result[0]
+        return data
+    }catch (err) {
+          
+        console.log(err)
+        return err
+        } 
+
+}
+// Function to get the category Id
+async function GetCategory(){
+    const mysql2= require('mysql2/promise');
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    try{  
+        for(j=0; j < category.length; j++){
+            cate = category[j]
+        }
+        const result = await connection.execute('SELECT Category_Id FROM category WHERE  category =?',[category])
+        console.log("gotten succesfullly")
+       //const result3 = result[0][0];
+
+        console.log(result[0][0].Category_Id)
+        data=  result
+        return data
+    }catch (err) {
+          
+        console.log(err)
+        return err
+        } 
+    
+}
+
 // Function to add price on first create 
 async function AddPrice(Item_Id){
     const mysql2= require('mysql2/promise');
@@ -183,6 +224,7 @@ router.post('/item',  (req, res) =>{
            City= req.body.City;
            SellerWeblink= req.body.SellerWeblink;
            date = req.body.date;
+           category = req.body.category;
            random = Math.random().toString(36).slice(-8);
            file = req.files.Image;
            Image = random+req.files.Image.name;
@@ -191,7 +233,7 @@ router.post('/item',  (req, res) =>{
           //let random = Math.random().toString(36).slice(-8);
           // let  Image = random+file.name;
           // let  Image = file.name;
-           console.log(Image);
+         //  console.log(Image);
         //    if (!req.files) {
         //     console.log('jjjjjj');
         //     return res.status(400).send('No files were uploaded.');
@@ -200,13 +242,14 @@ router.post('/item',  (req, res) =>{
         //  else{
           
         if(file.mimetype == "image/jpeg" ||file.mimetype == "image/png"||file.mimetype == "image/gif" ){
-        
-             if(ItemName && ItemDescription && DealersAddress && DealerPhone && PrefferedPrice && City  && date){
-                    file.mv('public/images/uploaded_images/'+Image, function(err) {
+             file.mv('public/images/uploaded_images/'+Image, function(err) {
                            
                         if (err)
                           return res.status(500).send(err);
                          });
+        }
+             if(ItemName && ItemDescription && DealersAddress && DealerPhone && PrefferedPrice && City  && date){
+                   
                         createItem()
                         .then(data => {
                             if (data.insertId){
@@ -223,6 +266,30 @@ router.post('/item',  (req, res) =>{
                             })
                         }
                     }); 
+                    GetCategory()
+                    .then(data => {
+                if (data.length>0){
+                 const Category_Id = data[0][0].Category_Id;
+                   console.log("inserted succesfully1");
+                   console.log(Category_Id);
+                   AddCategory(Item_Id, Category_Id)
+                   .then(data => {
+               if (data.insertId){
+                  console.log("inserted succesfully2");
+                  console.log(Item_Id);
+                  console.log(Category_Id);
+               }else{
+                console.log(" not inserted succesfully1");
+               }
+           });
+                }else{
+                    console.log(" not inserted succesfully2");
+                }
+            }); 
+
+
+
+
                                 console.log(Item_Id);
                                 res.json({
                                     success:true,
@@ -243,7 +310,7 @@ router.post('/item',  (req, res) =>{
                    
                          }                     
                    
-      }
+      
   //  }
         
 //  } else{
@@ -268,7 +335,7 @@ router.post('/price/:Item_Id',  (req, res) =>{
         Item_Id2= req.body.Item_Id;
         Item_Id = req.params.Item_Id;
         console.log(Item_Id)
-        //if( City &&  SellerWeblink && DealersAddress &&  DealerPhone &&  Price ){
+        if( City &&  SellerWeblink && DealersAddress &&  DealerPhone &&  Price ){
        
                    AddPrice2()
                      .then(data => {
@@ -286,10 +353,10 @@ router.post('/price/:Item_Id',  (req, res) =>{
                             })
                         }
                     });
-    //    }else{
+      }else{
           
-    //       console.log("you do not have permission to perform this operation")
-    //    }
+          console.log("Cant send empty input")
+       }
    
     
 
@@ -418,7 +485,7 @@ router.put('/price/:Id',  (req, res)=>{
                         })
                         }else{
                             res.status(400)
-                            res.json({
+                            res.json({ 
                                 success:false,
                                 message:"Not Updated"
                             })

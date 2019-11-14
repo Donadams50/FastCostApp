@@ -12,59 +12,41 @@ var mysqlConnection = mysql.createConnection({
   })
 
 // end point to create A NEW PROJECT
-  router.post('/project', passport.authenticate('jwt', { session: false}),  (req, res) =>{
+  router.post('/project',   (req, res) =>{
     //console.log(req.user)
-       console.log(JSON.stringify(req.user));
-  if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
+  //      console.log(JSON.stringify(req.user));
+  // if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
        ProjectName = req.body.ProjectName;
        console.log( ProjectName);
        ProjectDescription = req.body.ProjectDescription;
-       ProjectCost = req.body.ProjectCost;
+      // ProjectCost = req.body.ProjectCost;
        NoOfComponent = req.body.NoOfComponent;
-       Component = req.body.Component;
-  
-  mysqlConnection.query("insert into project (ProjectName, ProjectDescription,ProjectCost, NoOfComponent ) values ('"+ProjectName+"','"+ProjectDescription+"','"+ProjectCost+"','"+NoOfComponent+"')",function(err,results,fields){
+        Component = req.body.Component;
+        Item =  req.body.Item;
+        console.log( Item.Item_Id);
+  mysqlConnection.query("insert into project (ProjectName, ProjectDescription, NoOfComponent ) values ('"+ProjectName+"','"+ProjectDescription+"','"+NoOfComponent+"')",function(err,results,fields){
           if (!err){
-        console.log("Succesfully inserted " );
         const  Project_Id = results.insertId;
         console.log(Project_Id );
-         for (let j= 0; j < Component.length; j++){
-            ParentComponentId = Component[j].ParentComponentId;
+        const compLength =  Component.length;
+        const itemLength =  Item.length;
+        console.log(itemLength);
+        var ProjectCost = 0
+         for (let j= 0; j < compLength; j++){
+            ParentComponentId = Component[j].Id;
             ComponentDescription = Component[j].ComponentDescription;
             ComponentName=  Component[j].ComponentName;
             DateCreated=  Component[j].DateCreated;
             NoOfItems = Component[j].NoOfItems;
+            price = Component[j].TotalCost;
             Quantity = Component[j].Quantity;
-            TotalPrice = Component[j].TotalPrice;  
+            TotalPrice = Component[j].TotalCost; 
+            ProjectCost =  ProjectCost + parseInt(Component[j].TotalCost) * parseInt( Component[j].Quantity);
 
  mysqlConnection.query("insert into projectcomponent ( ComponentName, ComponentDescription,NoOfItems,Quantity,TotalPrice ,ParentComponentId, Project_Id) values ('"+ComponentName+"','"+ComponentDescription+"', '"+NoOfItems+"','"+Quantity+"','"+TotalPrice+"','"+ParentComponentId+"','"+Project_Id+"')",function(err,results,fields){
                 if (!err){
-              console.log("Succesfully inserted/" );
-                 const Item =  Component[j].Item;
-               const  component_Id = results.insertId;
-               const itemLength =  Item.length;
-               console.log(component_Id);
-             for(i=0; i < itemLength; i++){
-              Item_Id = Item[i].Item_Id;
-              ItemName =Item[i].ItemName;
-              ItemDescription= Item[i].ItemDescription;
-              Image = Item[i].Image;
-              PrefferedPrice = Item[i].PrefferedPrice;
-              DealersAddress = Item[i].DealersAddress;
-              DealerPhone =  Item[i].DealerPhone;
-              City = Item[i].City;
-              SellerWeblink = Item[i].SellerWeblink;
-              date = Item[i].date;
-     mysqlConnection.query("insert into projectitem ( Item_Id, ItemName, ItemDescription,Image, PrefferedPrice, DealersAddress, DealerPhone, City, SellerWeblink, date, component_Id, Project_Id) values ('"+Item_Id+"','"+ItemName+"', '"+ItemDescription+"', '"+Image+"', '"+PrefferedPrice+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+City+"', '"+SellerWeblink+"', '"+date+"', '"+component_Id+"', '"+Project_Id+"')", function(err,results,fields){   
-                if (!err){
-             console.log("Succesfully inserted " );
-                    }
-                else{
-                  console.log(err);
-                }
-                
-                });
-                 }
+              console.log("Succesfully inserted2" );
+             
                 }
             else {       
           console.log(err);
@@ -73,7 +55,43 @@ var mysqlConnection = mysql.createConnection({
             
             });
 
-         }      
+         }     
+         mysqlConnection.query("UPDATE project SET ProjectCost ='"+ProjectCost+"' WHERE Id=?",[Project_Id], function(err,results,fields){
+
+          if (!err){
+            console.log( TotalPrice );
+            res.status(201).send('success');
+              }
+          else
+      {
+        // return res.status(400).send('unsucess');
+          console.log(err);
+      }
+         
+          });  
+          
+       for(let i= 0; i < itemLength; i++){
+        Item_Id = Item[i].Item_Id;
+        ItemName =Item[i].ItemName;
+        ItemDescription= Item[i].ItemDescription;
+        Image = Item[i].Image;
+        PrefferedPrice = Item[i].PrefferedPrice;
+        DealersAddress = Item[i].DealersAddress;
+        DealerPhone =  Item[i].DealerPhone;
+        City = Item[i].City;
+        SellerWeblink = Item[i].SellerWeblink;
+        date = Item[i].date;
+        component_Id = Item[i].component_Id 
+  mysqlConnection.query("insert into projectitem ( Item_Id, ItemName, ItemDescription,Image, PrefferedPrice, DealersAddress, DealerPhone, City, SellerWeblink, date, component_Id, Project_Id) values ('"+Item_Id+"','"+ItemName+"', '"+ItemDescription+"', '"+Image+"', '"+PrefferedPrice+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+City+"', '"+SellerWeblink+"', '"+date+"', '"+component_Id+"', '"+Project_Id+"')", function(err,results,fields){   
+          if (!err){
+       console.log("Succesfully inserted item" );
+              }
+          else{
+            console.log(err);
+          }
+          
+          });
+           }
           }
       else{
     console.log(err);
@@ -84,10 +102,10 @@ var mysqlConnection = mysql.createConnection({
      
   
   
-  } else{
-    console.log("you do not have permission to perform this operation");
+  // } else{
+  //   console.log("you do not have permission to perform this operation");
        
-       }
+  //      }
   });
 // end point to get all projects or to get a particular project using query parameter
   router.get('/projects',  (req, res) =>{
@@ -95,6 +113,7 @@ var mysqlConnection = mysql.createConnection({
 
 //  if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 2){
  name = req.query.ProjectName;
+ name1 = req.query.Id;
 console.log("ddd")
 if(name){
   mysqlConnection.query('SELECT * FROM project where ProjectName like ? ',["%"+ name +"%"],function(err,results,fields){
@@ -110,7 +129,22 @@ if(name){
     
     });
   
-} else{     
+} else if(name1){     
+  mysqlConnection.query('SELECT * FROM project WHERE  Id =?',[name1], function(err,results,fields){
+      
+    if (!err){
+      console.log(results);
+      console.log("ffff");
+        res.status(201)
+               return res.json(results);
+        }
+    else{
+      console.log(err);
+    }
+    
+    });
+ 
+}else{     
   mysqlConnection.query('SELECT * FROM project', function(err,results,fields){
       
     if (!err){
@@ -126,6 +160,7 @@ if(name){
     });
  
 }
+
            
                               
 //  } else{
