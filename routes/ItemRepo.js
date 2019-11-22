@@ -20,9 +20,26 @@ var mysqlConnection = mysql.createConnection({
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{ 
         const result = await  connection.execute("insert into itemtemplate (ItemName, ItemDescription,  DealersAddress, DealerPhone,  PrefferedPrice, City, SellerWeblink, date, Image ) values ('"+ItemName+"','"+ItemDescription+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+PrefferedPrice+"', '"+City+"','"+SellerWeblink+"','"+date+"', '"+Image+"')")
-        console.log("item inserted with")
-        console.log(result[0].insertId)
+       // console.log("item inserted with")
+       // console.log(result[0].insertId)
         data= result[0]
+        return data
+    }catch (err) {
+          
+        console.log(err)
+        return err
+        } 
+    
+}
+// Function to create item
+async function UpdateItem(status1){
+    const mysql2= require('mysql2/promise');
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    try{ 
+        const result = await  connection.execute("UPDATE itemtemplate SET Status='"+status1+"'  WHERE Item_Id=?",[Item_Id])
+       // console.log("item inserted with")
+       // console.log(result[0].insertId)
+        data= result
         return data
     }catch (err) {
           
@@ -38,8 +55,8 @@ async function AddCategory( Item_Id, Category_Id){
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{ 
         const result = await  connection.execute("insert into itemcategory (Item_Id, Category_Id ) values ('"+Item_Id+"','"+Category_Id+"')")
-        console.log("item inserted with")
-        console.log(result[0].insertId)
+      //  console.log("item inserted with")
+      //  console.log(result[0].insertId)
         data= result[0]
         return data
     }catch (err) {
@@ -50,20 +67,38 @@ async function AddCategory( Item_Id, Category_Id){
 
 }
 // Function to get the category Id
-async function GetCategory(){
+async function GetCategory(category){
+    const mysql2= require('mysql2/promise');
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    try{
+        
+     const result = await connection.execute('SELECT Category_Id FROM category WHERE  category =?',[ category])
+      //  console.log("gotten succesfullly")
+      console.log("kig");  
+      console.log(category);
+    //  console.log( result[0][0])
+        data= result
+        return data
+       
+    }catch (err) {
+          
+        console.log(err)
+        return err
+        } 
+    
+}
+// Function to get the category Id
+async function CreateCategory(category){
     const mysql2= require('mysql2/promise');
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{  
-        for(j=0; j < category.length; j++){
-            cate = category[j]
-        }
-        const result = await connection.execute('SELECT Category_Id FROM category WHERE  category =?',[category])
-        console.log("gotten succesfullly")
-       //const result3 = result[0][0];
-
-        console.log(result[0][0].Category_Id)
-        data=  result
+      console.log(category);
+     const result = await connection.execute("insert into category (category) values ('"+category+"')")
+        //console.log("inserted  succesfullly 12")
+       // console.log(result[0].insertId)
+        data= result[0]
         return data
+       
     }catch (err) {
           
         console.log(err)
@@ -78,8 +113,8 @@ async function AddPrice(Item_Id){
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{ 
         const result = await   connection.execute("insert into pricetemplate (City,SellerWeblink, DealersAddress, DealerPhone, Price, Item_Id) values ('"+City+"','"+ SellerWeblink+"','"+DealersAddress+"', '"+DealerPhone+"','"+PrefferedPrice+"','"+Item_Id+"')")
-        console.log("item inserted with")
-        console.log(result[0].insertId)
+      //  console.log("item inserted with")
+       // console.log(result[0].insertId)
         data= result[0]
         return data
     }catch (err) {
@@ -123,7 +158,7 @@ async function GetItems(){
         } 
     
 }
-// Function to get a single item based on query parameter
+// Function to get a single item based on query parameter of name
 async function GetItem(){
     const mysql2= require('mysql2/promise');
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
@@ -140,6 +175,7 @@ async function GetItem(){
         } 
     
 }
+
 // Function to get all prices of a single item
 async function GetPrices(){
     const mysql2= require('mysql2/promise');
@@ -163,9 +199,9 @@ async function GetItemP(){
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{ 
         const result = await connection.execute('SELECT * FROM itemtemplate WHERE  Item_Id =?',[Item_Id])
-        console.log("gotten succesfullly")
-        console.log(result[0])
-        data= result
+        console.log("gotten succesfullly sat 2")
+       // console.log(result)
+        data= result[0]
         return data
     }catch (err) {
           
@@ -180,6 +216,25 @@ async function EditItem(){
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{ 
         const result = await connection.execute("UPDATE pricetemplate SET City='"+City+"', SellerWeblink='"+SellerWeblink+"', DealersAddress ='"+DealersAddress+"',DealerPhone= '"+DealerPhone+"', Price='"+Price+"' WHERE Id=?",[Id])
+        console.log("updated succesfully")
+        console.log(result[0].insertId)
+        data= result
+        return data
+    }catch (err) {
+          
+        console.log(err)
+        return err
+        } 
+    
+}
+
+
+// Function to make a price preffered price
+async function ChoosePreffered(){
+    const mysql2= require('mysql2/promise');
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    try{ 
+        const result = await connection.execute("UPDATE itemtemplate SET City='"+City+"', SellerWeblink='"+SellerWeblink+"', DealersAddress ='"+DealersAddress+"',DealerPhone= '"+DealerPhone+"', Price='"+Price+"' WHERE Item_Id=?",[Id])
         console.log("updated succesfully")
         console.log(result[0].insertId)
         data= result
@@ -210,11 +265,65 @@ async function DeleteItem(){
 }
 
 //....................................................................................................//
+// End point to change status of item
+router.put('/item/status/:Id',  (req, res)=>{
+    // City = req.body.City;
+    // SellerWeblink = req.body.SellerWeblink;
+    // DealersAddress =req.body.DealersAddress;
+    // DealerPhone = req.body.DealerPhone;
+    // Price = req.body.Price;
+   // DealersName = req.body.DealersName;
+    Item_Id= req.params.Id
+
+    GetItemP()
+    .then(data => {
+       if (data.length > 0){
+        console.log("I AM SUMBO");
+          console.log(data[0].Status);
+         
+          
+         // return res.json(data[0]);
+
+         const  status1 = !(data[0].Status);
+         console.log(status1);
+         if ( status1 == true ){
+             status2 = 1;
+         }else{
+            status2 = 0;
+         }
+         console.log(status2);
+         console.log("I AM SUMBO");
+          UpdateItem(status2)
+          .then(data => {
+             if (data[0].insertId == 0){
+                //console.log("Updated successfully");
+                res.json({
+                 success:true,
+                 message:"Updated successfully"
+             })
+             }else{
+                 res.status(400)
+                 res.json({ 
+                     success:false,
+                     message:"Not Updated"
+                 })
+             }
+         });
+
+       }else{
+           res.status(400)
+           res.json({
+               success:false,
+               message:"item not gotten"
+           })
+       }
+   });
+});  
 
 // End point to add a new item
 router.post('/item',  (req, res) =>{
     //console.log(req.user)
-   console.log(JSON.stringify(req.user)); 
+   //console.log(JSON.stringify(req.user)); 
 //  if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
            ItemName= req.body.ItemName;
            ItemDescription= req.body.ItemDescription;
@@ -224,31 +333,31 @@ router.post('/item',  (req, res) =>{
            City= req.body.City;
            SellerWeblink= req.body.SellerWeblink;
            date = req.body.date;
-           category = req.body.category;
+           category = JSON.parse(req.body.category);
            random = Math.random().toString(36).slice(-8);
-           file = req.files.Image;
-           Image = random+req.files.Image.name;
-          // let file = req.files.Image;
-           //console.log(file.name);
-          //let random = Math.random().toString(36).slice(-8);
-          // let  Image = random+file.name;
-          // let  Image = file.name;
-         //  console.log(Image);
-        //    if (!req.files) {
-        //     console.log('jjjjjj');
-        //     return res.status(400).send('No files were uploaded.');
+
+           console.log(category)
+           console.log(req.body)
+
+
+           if (!req.files){
+           Image = ""
+           }
+            else{
+                file = req.files.Image;
+                Image = random+req.files.Image.name;
+                file.mv('public/images/uploaded_images/'+Image);
+            }
+           
+
           
         //          }
         //  else{
           
-        if(file.mimetype == "image/jpeg" ||file.mimetype == "image/png"||file.mimetype == "image/gif" ){
-             file.mv('public/images/uploaded_images/'+Image, function(err) {
-                           
-                        if (err)
-                          return res.status(500).send(err);
-                         });
-        }
-             if(ItemName && ItemDescription && DealersAddress && DealerPhone && PrefferedPrice && City  && date){
+      // if(file.mimetype == "image/jpeg" ||file.mimetype == "image/png"||file.mimetype == "image/gif" ){
+             
+      //  }
+             if(ItemName  && PrefferedPrice ){
                    
                         createItem()
                         .then(data => {
@@ -257,7 +366,7 @@ router.post('/item',  (req, res) =>{
                              AddPrice(Item_Id)
                             .then(data => {
                         if (data.insertId){
-                           console.log("inserted succesfully");
+                           console.log("price added succesfully");
                         }else{
                             res.status(400)
                             res.json({
@@ -266,26 +375,59 @@ router.post('/item',  (req, res) =>{
                             })
                         }
                     }); 
-                    GetCategory()
-                    .then(data => {
-                if (data.length>0){
-                 const Category_Id = data[0][0].Category_Id;
-                   console.log("inserted succesfully1");
-                   console.log(Category_Id);
-                   AddCategory(Item_Id, Category_Id)
-                   .then(data => {
-               if (data.insertId){
-                  console.log("inserted succesfully2");
-                  console.log(Item_Id);
-                  console.log(Category_Id);
-               }else{
-                console.log(" not inserted succesfully1");
-               }
-           });
-                }else{
-                    console.log(" not inserted succesfully2");
-                }
-            }); 
+                    for(j=0; j < category.length; j++){
+                        const cat = category[j];
+                        console.log(category[j]);
+                        GetCategory(category[j])
+                        .then(data => {
+                    if (data[0].length >0){
+                     const Category_Id = data[0][0].Category_Id;
+                       console.log("inserted succesfully10");
+                       console.log(Category_Id);
+                       console.log(data[0].length)
+                       AddCategory(Item_Id, Category_Id)
+                       .then(data => {
+                   if (data.insertId){
+                      console.log("inserted succesfully2");
+                      console.log(Item_Id);
+                      console.log(Category_Id);
+                   }else{
+                    console.log(" not inserted succesfully1");
+                   }
+               });
+                    }else{
+                        //console.log(category[j]);
+                        CreateCategory(cat)
+                       .then(data => {
+                     if (data.insertId){
+                        console.log("inserted succesfully40");
+                        console.log(cat);
+                      const  CategoryId = data.insertId;
+                      console.log("inserted succesfully20");
+                      console.log(CategoryId);
+                        AddCategory(Item_Id, CategoryId)
+                       .then(data => {
+                   if (data.insertId){
+                      console.log("inserted succesfully30");
+                      console.log(CategoryId);
+                   }else{
+                    console.log(" not inserted succesfully1");
+                   }
+               });
+
+
+                   }else{
+                    console.log(" not inserted succesfully1");
+                   }
+               });
+
+
+
+                        console.log(" not inserted succesfully2");
+                    }
+                });
+                        }
+                    
 
 
 
@@ -293,7 +435,9 @@ router.post('/item',  (req, res) =>{
                                 console.log(Item_Id);
                                 res.json({
                                     success:true,
-                                    message:"Item created"
+                                    message:"Item created",
+                                    Item_Id
+                                    
                                 })
                             }else{
                                 res.status(400)
@@ -361,8 +505,8 @@ router.post('/price/:Item_Id',  (req, res) =>{
     
 
 });
-// End point to view all item
-router.get('/items',   (req, res) =>{
+// End point to view all item or get a simgle item based on query
+router.get('/items',     (req, res) =>{
     //console.log(req.user)
     name = req.query.ItemName;
    console.log(JSON.stringify(req.user));
@@ -423,7 +567,7 @@ router.get('/items/:Item_Id',  (req, res) =>{
     GetItemP()
     .then(data => {
        if (data.length>0){
-          console.log("gotten succesfully");
+          console.log("gotten succesfully sat");
           return res.json(data[0]);
        }else{
            res.status(400)
@@ -463,6 +607,36 @@ router.get('/prices/:Item_Id',  (req, res) =>{
 //     console.log("you do not have permission to perform this operation")
 //        }
 
+});
+
+
+// End point to edit a price of an item
+router.put('/chooseprefferedprice/:Item_Id',  (req, res)=>{
+    City = req.body.City;
+    SellerWeblink = req.body.SellerWeblink;
+    DealersAddress =req.body.DealersAddress;
+    DealerPhone = req.body.DealerPhone;
+    Price = req.body.Price;
+    DealersName = req.body.DealersName
+   // DealersName = req.body.DealersName;
+    Id= req.params.Item_Id;
+
+                   ChoosePreffered()
+                     .then(data => {
+                        if (data[0].insertId == 0){
+                           console.log("Updated successfully");
+                           res.json({
+                            success:true,
+                            message:"Updated successfully"
+                        })
+                        }else{
+                            res.status(400)
+                            res.json({ 
+                                success:false,
+                                message:"Not Updated"
+                            })
+                        }
+                    });
 });
 
 // End point to edit a price of an item

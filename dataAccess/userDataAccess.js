@@ -18,7 +18,7 @@ async function fetchUsers(req, res){
         catch{
             console.log("gggg")
         }
-
+// 29 5, 33 4,34 2, 38 2, 40 1,48 2,   51 2
 
             
 }

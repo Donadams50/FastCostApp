@@ -33,20 +33,24 @@ router.get('/profiless', passport.authenticate('jwt', { session: false}),  (req,
     if (results.length >0){
     let db_Password = mysqlConnection.query('SELECT Password from credential WHERE Email=?', [Email], function(error,results,row){
     if (results.length > 0){
-    console.log(results[0].Password);
+   // console.log(results[0].Password);
     db_Password=results[0].Password;
     //res.status(200)
     comparepassword(Password, db_Password, (err, isMatch) =>{
     if (err) throw err;
-    console.log(isMatch)
+    //console.log(isMatch)
     if (isMatch) {
         res.status(200)
     // get data of the user
     let result= mysqlConnection.query('Select * from credential Where Email=?', [Email], function(error,results,fields){
     if (results.length > 0){
-    console.log(JSON.stringify(results[0].Role_Id));
+  //  console.log(JSON.stringify(results[0].Role_Id));
      const role = results[0].Role_Id;
-      // console.log(results[0].Role_Id)         
+     const image = results[0].Image;
+    const id = results[0].User_Id;
+       console.log(results[0].Image) 
+       console.log(results[0].Role_Id) 
+        console.log("ghyt")       
     let user_data = results;
     
     //json token
@@ -56,6 +60,8 @@ router.get('/profiless', passport.authenticate('jwt', { session: false}),  (req,
     });
     return res.json({
     role,
+    image,
+    id,
     success:true,
     token:"JWT " + token
     });
@@ -113,8 +119,6 @@ router.get('/profiless', passport.authenticate('jwt', { session: false}),  (req,
         PhoneNumber= req.body.PhoneNumber;
         Address = req.body.Address;
         random = Math.random().toString(36).slice(-8);
-        file = req.files.Image;
-        Image = random+req.files.Image.name;
 
         if (FirstName && LastName &&  Location && Password && Email && Role && PhoneNumber && Address){
         bcrypt.genSalt(10, (err,salt)=> {
@@ -136,18 +140,21 @@ router.get('/profiless', passport.authenticate('jwt', { session: false}),  (req,
   mysqlConnection.query('SELECT Role_Id FROM role WHERE Role =?', [Role], function(error,results,fields){
 if (!error){
    roleId = results[0].Role_Id;
-   if(file.mimetype == "image/jpeg" ||file.mimetype == "image/png"||file.mimetype == "image/gif" ){
-    file.mv('public/images/users_images/'+Image, function(err) {
-                           
-        if (err)
-          return res.status(500).send(err);
-         });
-   }
+
+   if (!req.files){
+    Image = ""
+    }
+     else{
+         file = req.files.Image;
+         Image = random+req.files.Image.name;
+         file.mv('public/images/users_images/'+Image);
+     }
+  
    mysqlConnection.query("insert into user (FirstName, LastName,  Location, Email, PhoneNumber, Address, Role_Id,  Role, Image) values ('"+FirstName+"','"+LastName+"', '"+Location+"','"+Email+"','"+PhoneNumber+"', '"+Address+"','"+roleId+"', '"+Role+"', '"+Image+"')", function(err,results,fields){
     console.log(FirstName);
     if (!err){
         userId = results.insertId;
-        mysqlConnection.query("insert into credential (Email, Password, Role_Id, User_Id) values ('"+Email+"','"+Password+"','"+roleId+"','"+userId+"')", (err)=>{
+        mysqlConnection.query("insert into credential (Email, Password, Role_Id, User_Id, Image) values ('"+Email+"','"+Password+"','"+roleId+"','"+userId+"', '"+Image+"')", (err)=>{
             console.log("db pass" + Password);
             if (!err){
             res.status(201)
@@ -234,10 +241,35 @@ mysqlConnection.query('SELECT * FROM user WHERE Role =?',[name1], function(err, 
 //        }
 
 });
+
+// End point to get one user
+router.get('/user/:Id',  (req, res)=>{
+    
+    mysqlConnection.query('SELECT * FROM user WHERE Id =?',[req.params.Id], function(err, results, response){
+        if (!err){
+        res.status(201)
+       console.log(results)
+          return res.json(
+       results
+     );
+              }
+        else{
+          return(err);
+        }
+       
+        }); 
+   
+    
+});
+
+
+
 // End point to edit and update  a user
 router.put('/user/:Id',  (req, res)=>{
 
-    roleId =  mysqlConnection.query('SELECT Role_Id FROM role WHERE Role =?', [req.body.Role], function(error,results,fields){ 
+    mysqlConnection.query('SELECT Role_Id FROM role WHERE Role =?', [req.body.Role], function(error,results,fields){
+                console.log(req.body.Role)
+        console.log(results[0])
         roleId = results[0].Role_Id;
     mysqlConnection.query("UPDATE user SET FirstName='"+req.body.FirstName+"', LastName='"+req.body.LastName+"', Location= '"+req.body.Location+"', Email= '"+req.body.Email+"', PhoneNumber='"+req.body.PhoneNumber+"', Address='"+req.body.Address+"', Role='"+req.body.Role+"', Role_Id='"+roleId+"' WHERE Id=?",[req.params.Id], (err, results, fields) =>{       
             if (!err){

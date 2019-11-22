@@ -34,7 +34,7 @@ router.post('/component',   (req, res) =>{
      ComponentName= req.body.ComponentName;
      NoOfItems = req.body.NoOfItems
      Item = req.body.Item;
-
+     if(ComponentName ){
 mysqlConnection.query("insert into componenttemplate ( ComponentName, ComponentDescription,NoOfItems ) values ('"+ComponentName+"','"+ComponentDescription+"', '"+NoOfItems+"')",function(err,results,fields){
         if (!err){
       console.log("Succesfully inserted " );
@@ -106,7 +106,7 @@ mysqlConnection.query("insert into componenttemplate ( ComponentName, ComponentD
     console.log(err);
     });
    
-
+  }
 
 // } else{
 //   console.log("you do not have permission to perform this operation");
@@ -125,7 +125,7 @@ if(!name){
   mysqlConnection.query('SELECT * FROM componenttemplate ', function(err,results,fields){
       
       if (!err){
-        console.log(results);
+       // console.log(results);
         console.log("ffff");
           res.status(201)
                  return res.json(results);
@@ -162,10 +162,10 @@ router.get('/component/items/:component_Id', (req, res) =>{
   
  console.log(JSON.stringify(req.user)); 
 // if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){  
-  mysqlConnection.query('SELECT * FROM componentitemtemplate WHERE  component_Id =?',[req.params.component_Id], function(err, results, response){
+   mysqlConnection.query('SELECT * FROM componentitemtemplate WHERE  component_Id =?',[req.params.component_Id], function(err, results, response){
       if (!err){
       res.status(201)
-     console.log(results)
+    // console.log(results)
         return res.json(
      results
    );
@@ -174,7 +174,7 @@ router.get('/component/items/:component_Id', (req, res) =>{
         console.log(err);
       }
      
-      });  
+      }); 
     
                               
 // } else{
@@ -228,21 +228,25 @@ mysqlConnection.query('DELETE FROM componentitemtemplat WHERE Id =?',[Id], funct
 // to add new item to a component
 router.put('/component/items/:component_Id', (req, res) =>{
    //console.log(req.user)
-   console.log(JSON.stringify(req.user));
+   //console.log(JSON.stringify(req.user));
 
    // if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
         ComponentDescription= req.body.ComponentDescription;
         ComponentName= req.body.ComponentName;
         NoOfItems = req.body.NoOfItems
         Item = req.body.Item;
-   
-   mysqlConnection.query("UPDATE componenttemplate SET  ComponentDescription='"+ ComponentDescription+"', ComponentName='"+ComponentName+"', NoOfItems ='"+NoOfItems+"' WHERE Id=?",[Id],function(err,results,fields){
+        const itemLength =  Item.length;
+        component_Id = req.params.component_Id;
+       
+   mysqlConnection.query("UPDATE componenttemplate SET ComponentDescription='"+ComponentDescription+"', ComponentName='"+ComponentName+"', NoOfItems ='"+NoOfItems+"' WHERE Id=?",[component_Id],function(err,results,fields){
            if (!err){
          console.log("Succesfully inserted " );
       // res.status(201).send('success');
-          console.log(component_Id);
+          //console.log(component_Id);
+          var TotalPrice = 0;
         for(j=0; j < itemLength; j++){
          Item_Id = Item[j].Item_Id;
+         Id = Item[j].Id;
          ItemName =Item[j].ItemName;
          ItemDescription= Item[j].ItemDescription;
          Image = Item[j].Image;
@@ -252,18 +256,57 @@ router.put('/component/items/:component_Id', (req, res) =>{
          City = Item[j].City;
          SellerWeblink = Item[j].SellerWeblink;
          date = Item[j].date;
-         mysqlConnection.query("insert into componentitemtemplate ( Item_Id, ItemName, ItemDescription,Image, PrefferedPrice, DealersAddress, DealerPhone, City, SellerWeblink, date, component_Id) values ('"+Item_Id+"','"+ItemName+"', '"+ItemDescription+"', '"+Image+"', '"+PrefferedPrice+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+City+"', '"+SellerWeblink+"', '"+date+"', '"+component_Id+"')", function(err,results,fields){
-           if (!err){
-             console.log("Succesfully inserted " );
-           
-               }
-           else
+         Quantity =Item[j].Quantity;
+        TotalPrice = TotalPrice + parseInt(Item[j].PrefferedPrice) * parseInt(Item[j].Quantity);
+
+         mysqlConnection.query('SELECT * FROM componentitemtemplate WHERE  Id =?',[Id], function(err, results, response){
+          if (!err){
+            const len = results.length;
+       if( len > 0) {  
+        console.log("ori e " );
+         console.log(results.length)
        
-          // return res.status(400).send('unsucess');
-           console.log(err);
-           });
+       } 
+        else{
+          console.log("imu e " );
+         console.log(results.length)
+          mysqlConnection.query("insert into componentitemtemplate ( Item_Id, ItemName, ItemDescription,Image, PrefferedPrice, DealersAddress, DealerPhone, City, SellerWeblink, date, component_Id, ComponentName, Quantity) values ('"+Item_Id+"','"+ItemName+"', '"+ItemDescription+"', '"+Image+"', '"+PrefferedPrice+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+City+"', '"+SellerWeblink+"', '"+date+"', '"+component_Id+"', '"+ComponentName+"',  '"+Quantity+"')", function(err,results,fields){
+
+            if (!err){
+              console.log("Succesfully inserted " );
+            
+                }
+            else
+        
+           // return res.status(400).send('unsucess');
+            console.log(err);
+            });
+
+
+        }
+       
+                }
+          else{
+            console.log(err);
+          }
+         
+          });
+
             }
-            res.status(201).send('success');
+   mysqlConnection.query("UPDATE componenttemplate SET TotalCost ='"+TotalPrice+"' WHERE Id=?",[component_Id], function(err,results,fields){
+
+              if (!err){
+               console.log( TotalPrice );
+                res.status(201).send('success');
+                  }
+              else
+          {
+            // return res.status(400).send('unsucess');
+              console.log(err);
+          }
+             
+              });
+            
            }
        else
    
