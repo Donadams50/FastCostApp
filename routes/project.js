@@ -27,10 +27,10 @@ var mysqlConnection = mysql.createConnection({
   mysqlConnection.query("insert into project (ProjectName, ProjectDescription, NoOfComponent ) values ('"+ProjectName+"','"+ProjectDescription+"','"+NoOfComponent+"')",function(err,results,fields){
           if (!err){
         const  Project_Id = results.insertId;
-        console.log(Project_Id );
+      //  console.log(Project_Id );
         const compLength =  Component.length;
         const itemLength =  Item.length;
-        console.log(itemLength);
+      //  console.log(itemLength);
         var ProjectCost = 0
          for (let j= 0; j < compLength; j++){
             ParentComponentId = Component[j].Id;
@@ -71,21 +71,54 @@ var mysqlConnection = mysql.createConnection({
           date = Item[i].date;
           ParentComponent_Id = Item[i].component_Id;
           Quantity = Item[i].Quantity;
+
+          mysqlConnection.query('SELECT * FROM itemcategory WHERE  Item_Id =?',[Item_Id], function(err, results, response){
+            if (!err){
+            console.log("come up");
+           console.log(results.length)
+           console.log(results)
+           for(j=0; j < results.length; j++){
+
+ mysqlConnection.query("insert into projectitemcategory ( Item_Id, Category_Id, Category_Name, Project_Id, Component_Id) values ('"+results[j].Item_Id+"','"+results[j].Category_Id+"', '"+results[j].Category_Name+"', '"+Project_Id+"','"+ParentComponent_Id+"')", function(err,results,fields){
+
+              if (!err){
+                console.log("Succesfully inserted " );
+              
+                  }
+              else
+          {
+             // return res.status(400).send('unsucess');
+             console.log(err);
+          }
+            
+              });
+
+           }
+          
+                  }
+            else{
+              console.log(err);
+            }
+           
+            });  
+         
+          
          // component_Id = component1_Id
     mysqlConnection.query("insert into projectitem ( Item_Id, ItemName, ItemDescription,Image, PrefferedPrice, DealersAddress, DealerPhone, City, SellerWeblink, date,  Project_Id,  ParentComponent_Id, Quantity) values ('"+Item_Id+"','"+ItemName+"', '"+ItemDescription+"', '"+Image+"', '"+PrefferedPrice+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+City+"', '"+SellerWeblink+"', '"+date+"', '"+Project_Id+"', '"+ParentComponent_Id+"', '"+Quantity+"')", function(err,results,fields){   
             if (!err){
-         console.log("Succesfully inserted item" );
+     //    console.log("Succesfully inserted item" );
                 }
             else{
               console.log(err);
             }
             
             });
-             }    
+             }  
+             
          mysqlConnection.query("UPDATE project SET ProjectCost ='"+ProjectCost+"' WHERE Id=?",[Project_Id], function(err,results,fields){
 
           if (!err){
-            console.log( TotalPrice );
+          //  console.log( TotalPrice );
             res.status(201).send('success');
               }
           else

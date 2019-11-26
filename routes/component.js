@@ -114,7 +114,7 @@ mysqlConnection.query("insert into componenttemplate ( ComponentName, ComponentD
 //      }
 });
 // to get all component from repo
-router.get('/components',  (req, res) =>{
+router.get('/components',   (req, res) =>{
   //console.log(req.user) 
  console.log(JSON.stringify(req.user));
 
@@ -157,7 +157,7 @@ if(!name){
 
 });
 // to get the all items in a componenets 
-router.get('/component/items/:component_Id', (req, res) =>{
+router.get('/component/items/:component_Id', passport.authenticate('jwt', { session: false}),   (req, res) =>{
   //console.log(req.user)
   
  console.log(JSON.stringify(req.user)); 
@@ -184,7 +184,7 @@ router.get('/component/items/:component_Id', (req, res) =>{
 });
 
 // to get an item from a component based on its id
-router.get('/component/item/:component_Id', (req, res) =>{
+router.get('/component/item/:component_Id',    (req, res) =>{
   //console.log(req.user)
   
  console.log(JSON.stringify(req.user)); 
@@ -211,7 +211,7 @@ router.get('/component/item/:component_Id', (req, res) =>{
 });
 
 // End point to remove item from component
-router.delete('/components/item/:Id',  (req, res) =>{
+router.delete('/components/item/:Id',   (req, res) =>{
 mysqlConnection.query('DELETE FROM componentitemtemplat WHERE Id =?',[Id], function(err,results,fields){    
   if (!err){
     console.log(results);
@@ -328,7 +328,7 @@ router.put('/component/items/:component_Id', (req, res) =>{
 
 
 // to get the details of a componenet
-router.get('/component/:component_Id',   (req, res) =>{
+router.get('/component/:component_Id',    (req, res) =>{
   //console.log(req.user)
   
  console.log(JSON.stringify(req.user)); 

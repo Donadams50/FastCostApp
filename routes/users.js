@@ -141,14 +141,14 @@ router.get('/profiless', passport.authenticate('jwt', { session: false}),  (req,
 if (!error){
    roleId = results[0].Role_Id;
 
-   if (!req.files){
-    Image = ""
-    }
-     else{
-         file = req.files.Image;
-         Image = random+req.files.Image.name;
-         file.mv('public/images/users_images/'+Image);
-     }
+//    if (!req.files){
+//     Image = ""
+//     }
+//      else{
+//          file = req.files.Image;
+//          Image = random+req.files.Image.name;
+//          file.mv('public/images/users_images/'+Image);
+//      }
   
    mysqlConnection.query("insert into user (FirstName, LastName,  Location, Email, PhoneNumber, Address, Role_Id,  Role, Image) values ('"+FirstName+"','"+LastName+"', '"+Location+"','"+Email+"','"+PhoneNumber+"', '"+Address+"','"+roleId+"', '"+Role+"', '"+Image+"')", function(err,results,fields){
     console.log(FirstName);
@@ -265,7 +265,7 @@ router.get('/user/:Id',  (req, res)=>{
 
 
 // End point to edit and update  a user
-router.put('/user/:Id',  (req, res)=>{
+router.put('/user/role/:Id',  (req, res)=>{
 
     mysqlConnection.query('SELECT Role_Id FROM role WHERE Role =?', [req.body.Role], function(error,results,fields){
                 console.log(req.body.Role)
@@ -300,6 +300,53 @@ router.put('/user/:Id',  (req, res)=>{
     });
     
 });  
+
+
+// End point to edit and update  a user
+router.put('/user',  (req, res)=>{
+    const random = Math.random().toString(36).slice(-8);
+    mysqlConnection.query('SELECT Role_Id FROM role WHERE Role =?', [req.body.Role], function(error,results,fields){
+                console.log(req.body.Role)
+        console.log(results[0])
+       // roleId = results[0].Role_Id;
+        if (!req.files){
+            Image = ""
+            }
+             else{
+                 file = req.files.Image;
+                 Image = random+req.files.Image.name;
+                 file.mv('public/images/users_images/'+Image);
+                 console.log(Image)
+             }
+    mysqlConnection.query("UPDATE user SET FirstName='"+req.body.FirstName+"', LastName='"+req.body.LastName+"', Location= '"+req.body.Location+"', Email= '"+req.body.Email+"', PhoneNumber='"+req.body.PhoneNumber+"', Address='"+req.body.Address+"',  Image='"+Image+"' WHERE Id=?",[req.body.Id], (err, results, fields) =>{       
+            if (!err){
+                console.log("jjjj");
+                
+                mysqlConnection.query("UPDATE credential SET Email='"+req.body.Email+"',  Image='"+Image+"' WHERE User_Id=?",[req.body.Id], (err, results, fields) =>{ 
+                    if (!err){
+                    res.status(201)
+                    res.send("user updated succesfully")
+                    res.end()
+                    
+                    }
+                    else{
+                        console.log(err);
+                    }
+                    
+                    });
+                  }
+          
+            else{
+                res.send('unsuccessful');
+                console.log(err);
+            }
+           
+        });
+
+        
+    });
+    
+}); 
 
 
 

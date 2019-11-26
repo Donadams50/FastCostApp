@@ -36,7 +36,7 @@ async function UpdateItem(status1){
     const mysql2= require('mysql2/promise');
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{ 
-        const result = await  connection.execute("UPDATE itemtemplate SET Status='"+status1+"'  WHERE Item_Id=?",[Item_Id])
+        const result = await  connection.execute("UPDATE itemtemplate SET Category_Name='"+status1+"'  WHERE Item_Id=?",[Item_Id])
        // console.log("item inserted with")
        // console.log(result[0].insertId)
         data= result
@@ -50,11 +50,11 @@ async function UpdateItem(status1){
 }
 
 // Function to add category
-async function AddCategory( Item_Id, Category_Id){
+async function AddCategory( Item_Id, Category_Id, Category_Name){
     const mysql2= require('mysql2/promise');
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{ 
-        const result = await  connection.execute("insert into itemcategory (Item_Id, Category_Id ) values ('"+Item_Id+"','"+Category_Id+"')")
+        const result = await  connection.execute("insert into itemcategory (Item_Id, Category_Id, Category_Name) values ('"+Item_Id+"','"+Category_Id+"', '"+Category_Name+"')")
       //  console.log("item inserted with")
       //  console.log(result[0].insertId)
         data= result[0]
@@ -72,11 +72,11 @@ async function GetCategory(category){
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{
         
-     const result = await connection.execute('SELECT Category_Id FROM category WHERE  category =?',[ category])
+     const result = await connection.execute('SELECT * FROM category WHERE  category =?',[ category])
       //  console.log("gotten succesfullly")
       console.log("kig");  
-      console.log(category);
-    //  console.log( result[0][0])
+    //  console.log(category);
+      console.log( result[0][0].category)
         data= result
         return data
        
@@ -148,7 +148,7 @@ async function GetItems(){
     try{ 
         const result = await connection.execute('SELECT * FROM itemtemplate ')
         console.log("item inserted with")
-        console.log(result[0])
+      //  console.log(result[0])
         data= result
         return data
     }catch (err) {
@@ -234,7 +234,7 @@ async function ChoosePreffered(){
     const mysql2= require('mysql2/promise');
     const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
     try{ 
-        const result = await connection.execute("UPDATE itemtemplate SET City='"+City+"', SellerWeblink='"+SellerWeblink+"', DealersAddress ='"+DealersAddress+"',DealerPhone= '"+DealerPhone+"', Price='"+Price+"' WHERE Item_Id=?",[Id])
+        const result = await connection.execute("UPDATE itemtemplate SET City='"+City+"', SellerWeblink='"+SellerWeblink+"', DealersAddress ='"+DealersAddress+"',DealerPhone= '"+DealerPhone+"', PrefferedPrice='"+Price+"' WHERE Item_Id=?",[Id])
         console.log("updated succesfully")
         console.log(result[0].insertId)
         data= result
@@ -266,7 +266,7 @@ async function DeleteItem(){
 
 //....................................................................................................//
 // End point to change status of item
-router.put('/item/status/:Id',  (req, res)=>{
+router.put('/item/status/:Id',   (req, res)=>{
     // City = req.body.City;
     // SellerWeblink = req.body.SellerWeblink;
     // DealersAddress =req.body.DealersAddress;
@@ -321,7 +321,7 @@ router.put('/item/status/:Id',  (req, res)=>{
 });  
 
 // End point to add a new item
-router.post('/item',  (req, res) =>{
+router.post('/item',  passport.authenticate('jwt', { session: false}),  (req, res) =>{
     //console.log(req.user)
    //console.log(JSON.stringify(req.user)); 
 //  if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
@@ -381,20 +381,34 @@ router.post('/item',  (req, res) =>{
                         GetCategory(category[j])
                         .then(data => {
                     if (data[0].length >0){
+                      console.log(data[0][0]);
                      const Category_Id = data[0][0].Category_Id;
+                     const Category_Name = data[0][0].category;
                        console.log("inserted succesfully10");
                        console.log(Category_Id);
-                       console.log(data[0].length)
-                       AddCategory(Item_Id, Category_Id)
+                    //   console.log(data[0].length)
+                       console.log(Category_Name);
+                       AddCategory(Item_Id, Category_Id,Category_Name)
                        .then(data => {
                    if (data.insertId){
                       console.log("inserted succesfully2");
-                      console.log(Item_Id);
-                      console.log(Category_Id);
+                    //  console.log(Item_Id);
+                    //  console.log(Category_Id);
+                   
                    }else{
                     console.log(" not inserted succesfully1");
                    }
                });
+            //    UpdateItem(Category_Name)
+            //    .then(data => {
+            //       if (data[0].insertId == 0){
+            //          console.log("Updated category succesfully");
+                    
+            //       }else{
+            //         console.log("not Updated category succesfully");
+            //       }
+            //   });
+
                     }else{
                         //console.log(category[j]);
                         CreateCategory(cat)
@@ -510,6 +524,7 @@ router.get('/items',     (req, res) =>{
     //console.log(req.user)
     name = req.query.ItemName;
    console.log(JSON.stringify(req.user));
+   console.log("shina")
  
 //  if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
 //    mysqlConnection.query('SELECT MIN(Price) AS SmallestPrice FROM pricetemplate',  function(err,results,fields){
@@ -553,13 +568,13 @@ if(!name){
    });
 }             
                                 
-//  } else{
+//  } else{z
 //     console.log("you do not have permission to perform this operation")
 //        }
 
 });
 // End point to get a single item with details
-router.get('/items/:Item_Id',  (req, res) =>{
+router.get('/items/:Item_Id',   (req, res) =>{
     //console.log(req.user)
     Item_Id = req.params.Item_Id
    console.log(JSON.stringify(req.user)); 
@@ -618,7 +633,13 @@ router.put('/chooseprefferedprice/:Item_Id',  (req, res)=>{
     DealerPhone = req.body.DealerPhone;
     Price = req.body.Price;
     DealersName = req.body.DealersName
-   // DealersName = req.body.DealersName;
+   
+   console.log(City)
+   console.log(SellerWeblink)
+   console.log(DealersAddress)
+   console.log(DealerPhone)
+   console.log(Price)
+   console.log(DealersName)
     Id= req.params.Item_Id;
 
                    ChoosePreffered()
