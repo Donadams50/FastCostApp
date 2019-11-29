@@ -8,16 +8,31 @@ var mysqlConnection = mysql.createConnection({
     host:'localhost',
     user:'root',
     password:'',
-    database: 'procost',
+    database: 'procostorig',
     multipleStatements: true
+    
   })
-  
-
+  // end point to get all items in the item table
+  async function GetItemsLength(){
+    const mysql2= require('mysql2/promise');
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
+    try{ 
+        const result = await  connection.execute('SELECT COUNT(Item_Id) AS NumberOfItems FROM itemtemplate ')
+        console.log("selected already")
+        console.log(result[0])     
+         data= result[0]
+         return data
+    }catch (err) {        
+        console.log(err)
+        return err
+        } 
+    
+    }
 
 // Function to create item
   async function createItem(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
         const result = await  connection.execute("insert into itemtemplate (ItemName, ItemDescription,  DealersAddress, DealerPhone,  PrefferedPrice, City, SellerWeblink, date, Image ) values ('"+ItemName+"','"+ItemDescription+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+PrefferedPrice+"', '"+City+"','"+SellerWeblink+"','"+date+"', '"+Image+"')")
        // console.log("item inserted with")
@@ -34,7 +49,7 @@ var mysqlConnection = mysql.createConnection({
 // Function to create item
 async function UpdateItem(status1){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
         const result = await  connection.execute("UPDATE itemtemplate SET Category_Name='"+status1+"'  WHERE Item_Id=?",[Item_Id])
        // console.log("item inserted with")
@@ -52,7 +67,7 @@ async function UpdateItem(status1){
 // Function to add category
 async function AddCategory( Item_Id, Category_Id, Category_Name){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
         const result = await  connection.execute("insert into itemcategory (Item_Id, Category_Id, Category_Name) values ('"+Item_Id+"','"+Category_Id+"', '"+Category_Name+"')")
       //  console.log("item inserted with")
@@ -69,14 +84,14 @@ async function AddCategory( Item_Id, Category_Id, Category_Name){
 // Function to get the category Id
 async function GetCategory(category){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{
         
-     const result = await connection.execute('SELECT * FROM category WHERE  category =?',[ category])
+     const result = await connection.execute('SELECT * FROM category WHERE category =?',[category])
       //  console.log("gotten succesfullly")
       console.log("kig");  
     //  console.log(category);
-      console.log( result[0][0].category)
+     // console.log( result[0][0].category)
         data= result
         return data
        
@@ -90,7 +105,7 @@ async function GetCategory(category){
 // Function to get the category Id
 async function CreateCategory(category){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{  
       console.log(category);
      const result = await connection.execute("insert into category (category) values ('"+category+"')")
@@ -110,11 +125,11 @@ async function CreateCategory(category){
 // Function to add price on first create 
 async function AddPrice(Item_Id){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
-        const result = await   connection.execute("insert into pricetemplate (City,SellerWeblink, DealersAddress, DealerPhone, Price, Item_Id) values ('"+City+"','"+ SellerWeblink+"','"+DealersAddress+"', '"+DealerPhone+"','"+PrefferedPrice+"','"+Item_Id+"')")
+        const result = await   connection.execute("insert into pricetemplate (City,SellerWeblink, DealersAddress, DealerPhone, Price, Item_Id, DealersName) values ('"+City+"','"+ SellerWeblink+"','"+DealersAddress+"', '"+DealerPhone+"','"+PrefferedPrice+"','"+Item_Id+"', '"+DealersName+"')")
       //  console.log("item inserted with")
-       // console.log(result[0].insertId)
+        console.log(result[0].insertId)
         data= result[0]
         return data
     }catch (err) {
@@ -127,9 +142,9 @@ async function AddPrice(Item_Id){
 // Function to add price on already created item 
 async function AddPrice2(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
-        const result = await   connection.execute("insert into pricetemplate (City,SellerWeblink, DealersAddress, DealerPhone, Price, Item_Id) values ('"+City+"','"+ SellerWeblink+"','"+DealersAddress+"', '"+DealerPhone+"','"+Price+"','"+Item_Id+"')")
+        const result = await   connection.execute("insert into pricetemplate (City,SellerWeblink, DealersAddress, DealerPhone, Price, Item_Id, DealersName) values ('"+City+"','"+ SellerWeblink+"','"+DealersAddress+"', '"+DealerPhone+"','"+Price+"','"+Item_Id+"', '"+DealersName+"')")
         console.log("item inserted ")
         console.log(result[0].insertId)
         data= result[0]
@@ -142,12 +157,29 @@ async function AddPrice2(){
     
 }
 // Function to get all items
+async function GetItemsMobile(){
+    const mysql2= require('mysql2/promise');
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
+    try{ 
+        const result = await connection.execute('SELECT * FROM itemtemplate')
+         
+      //  console.log(result[0])
+        data= result
+        return data
+    }catch (err) {
+          
+        console.log(err)
+        return err
+        } 
+    
+}
+// Function to get all items
 async function GetItems(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
-        const result = await connection.execute('SELECT * FROM itemtemplate ')
-        console.log("item inserted with")
+        const result = await connection.execute('SELECT * FROM itemtemplate LIMIT 10 OFFSET ? ',[offset])
+         
       //  console.log(result[0])
         data= result
         return data
@@ -161,7 +193,7 @@ async function GetItems(){
 // Function to get a single item based on query parameter of name
 async function GetItem(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
         const result = await connection.execute('SELECT * FROM itemtemplate where  ItemName like "%' +name+'%" ')
         console.log("gotten succesfullly")
@@ -179,7 +211,7 @@ async function GetItem(){
 // Function to get all prices of a single item
 async function GetPrices(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
         const result = await connection.execute('SELECT * FROM pricetemplate WHERE  Item_Id =?',[Item_Id])
         console.log("gotten succesfullly")
@@ -196,7 +228,7 @@ async function GetPrices(){
 // Function to get a single item base on path parameter
 async function GetItemP(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
         const result = await connection.execute('SELECT * FROM itemtemplate WHERE  Item_Id =?',[Item_Id])
         console.log("gotten succesfullly sat 2")
@@ -213,9 +245,9 @@ async function GetItemP(){
 // Function to edit an Item
 async function EditItem(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
-        const result = await connection.execute("UPDATE pricetemplate SET City='"+City+"', SellerWeblink='"+SellerWeblink+"', DealersAddress ='"+DealersAddress+"',DealerPhone= '"+DealerPhone+"', Price='"+Price+"' WHERE Id=?",[Id])
+        const result = await connection.execute("UPDATE pricetemplate SET City='"+City+"', SellerWeblink='"+SellerWeblink+"', DealersAddress ='"+DealersAddress+"',DealerPhone= '"+DealerPhone+"', Price='"+Price+"', DealersName='"+DealersName+"' WHERE Id=?",[Id])
         console.log("updated succesfully")
         console.log(result[0].insertId)
         data= result
@@ -232,9 +264,9 @@ async function EditItem(){
 // Function to make a price preffered price
 async function ChoosePreffered(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
-        const result = await connection.execute("UPDATE itemtemplate SET City='"+City+"', SellerWeblink='"+SellerWeblink+"', DealersAddress ='"+DealersAddress+"',DealerPhone= '"+DealerPhone+"', PrefferedPrice='"+Price+"' WHERE Item_Id=?",[Id])
+        const result = await connection.execute("UPDATE itemtemplate SET City='"+City+"', SellerWeblink='"+SellerWeblink+"', DealersAddress ='"+DealersAddress+"',DealerPhone= '"+DealerPhone+"', PrefferedPrice='"+Price+"', DealersName='"+DealersName+"' WHERE Item_Id=?",[Id])
         console.log("updated succesfully")
         console.log(result[0].insertId)
         data= result
@@ -249,7 +281,7 @@ async function ChoosePreffered(){
 // Function to delete a price from an item
 async function DeleteItem(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
         const result = await connection.execute('DELETE FROM pricetemplate WHERE Id =?',[Id])
         console.log("Deleted succesfully")
@@ -328,16 +360,25 @@ router.post('/item',  passport.authenticate('jwt', { session: false}),  (req, re
            ItemName= req.body.ItemName;
            ItemDescription= req.body.ItemDescription;
            DealersAddress= req.body.DealersAddress; 
-           DealerPhone= req.body.DealerPhone;
-           PrefferedPrice= req.body.PrefferedPrice; 
+           DealerPhone= req.body.DealerPhone;    
            City= req.body.City;
            SellerWeblink= req.body.SellerWeblink;
            date = req.body.date;
+           DealersName = req.body.DealersName
            category = JSON.parse(req.body.category);
+         
            random = Math.random().toString(36).slice(-8);
+           const zero = 0;
+        if (req.body.PrefferedPrice){
+           
+            PrefferedPrice= req.body.PrefferedPrice;
+        }
+        else{
+            PrefferedPrice = parseInt(zero);
 
-           console.log(category)
-           console.log(req.body)
+        }
+           //console.log(category)
+          // console.log(req.body)
 
 
            if (!req.files){
@@ -357,7 +398,7 @@ router.post('/item',  passport.authenticate('jwt', { session: false}),  (req, re
       // if(file.mimetype == "image/jpeg" ||file.mimetype == "image/png"||file.mimetype == "image/gif" ){
              
       //  }
-             if(ItemName  && PrefferedPrice ){
+             if(ItemName){
                    
                         createItem()
                         .then(data => {
@@ -377,10 +418,10 @@ router.post('/item',  passport.authenticate('jwt', { session: false}),  (req, re
                     }); 
                     for(j=0; j < category.length; j++){
                         const cat = category[j];
-                        console.log(category[j]);
+                        //console.log(category[j]);
                         GetCategory(category[j])
                         .then(data => {
-                    if (data[0].length >0){
+                    if (data[0].length > 0){
                       console.log(data[0][0]);
                      const Category_Id = data[0][0].Category_Id;
                      const Category_Name = data[0][0].category;
@@ -388,7 +429,8 @@ router.post('/item',  passport.authenticate('jwt', { session: false}),  (req, re
                        console.log(Category_Id);
                     //   console.log(data[0].length)
                        console.log(Category_Name);
-                       AddCategory(Item_Id, Category_Id,Category_Name)
+                       
+                       AddCategory(Item_Id, Category_Id, Category_Name)
                        .then(data => {
                    if (data.insertId){
                       console.log("inserted succesfully2");
@@ -399,27 +441,18 @@ router.post('/item',  passport.authenticate('jwt', { session: false}),  (req, re
                     console.log(" not inserted succesfully1");
                    }
                });
-            //    UpdateItem(Category_Name)
-            //    .then(data => {
-            //       if (data[0].insertId == 0){
-            //          console.log("Updated category succesfully");
-                    
-            //       }else{
-            //         console.log("not Updated category succesfully");
-            //       }
-            //   });
 
-                    }else{
+                    } else{
                         //console.log(category[j]);
                         CreateCategory(cat)
                        .then(data => {
-                     if (data.insertId){
+                     if(data.insertId){
                         console.log("inserted succesfully40");
                         console.log(cat);
                       const  CategoryId = data.insertId;
                       console.log("inserted succesfully20");
                       console.log(CategoryId);
-                        AddCategory(Item_Id, CategoryId)
+                        AddCategory(Item_Id, CategoryId ,cat)
                        .then(data => {
                    if (data.insertId){
                       console.log("inserted succesfully30");
@@ -430,7 +463,9 @@ router.post('/item',  passport.authenticate('jwt', { session: false}),  (req, re
                });
 
 
-                   }else{
+                   }
+                   
+                   else{
                     console.log(" not inserted succesfully1");
                    }
                });
@@ -490,10 +525,11 @@ router.post('/price/:Item_Id',  (req, res) =>{
         DealersAddress= req.body.DealersAddress; 
         DealerPhone= req.body.DealerPhone;
         Price= req.body.Price;
+        DealersName = req.body.DealersName;
         Item_Id2= req.body.Item_Id;
         Item_Id = req.params.Item_Id;
         console.log(Item_Id)
-        if( City &&  SellerWeblink && DealersAddress &&  DealerPhone &&  Price ){
+        if( Price ){
        
                    AddPrice2()
                      .then(data => {
@@ -520,28 +556,82 @@ router.post('/price/:Item_Id',  (req, res) =>{
 
 });
 // End point to view all item or get a simgle item based on query
-router.get('/items',     (req, res) =>{
-    //console.log(req.user)
+router.get('/webitems', (req, res) =>{
+   
     name = req.query.ItemName;
+    offset= req.query.OffSet;
+    console.log("mogbe")
+     console.log(offset)
+    if(!offset){
+       offset = 0;
+    }
+    
    console.log(JSON.stringify(req.user));
    console.log("shina")
  
 //  if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
-//    mysqlConnection.query('SELECT MIN(Price) AS SmallestPrice FROM pricetemplate',  function(err,results,fields){
-//     console.log("yes");
-//                 if (!err){
-//                 res.status(201)
-//                 console.log(results);
-//                 return res.json(results);
-//                     }
-//                 else
-//                 console.log(err);   
-//     });
+
 if(!name){
     GetItems()
     .then(data => {
        if (data.length>0){
+          console.log("gotten succesfully sumbo");
+          console.log(data[0].length);
+
+          return res.json(data[0]);
+       }else{
+           res.status(400)
+           res.json({
+               success:false,
+               message:"item not gotten"
+           })
+       }
+   });
+} else{
+     
+    GetItem()
+    .then(data => {
+       if (data.length > 0){
           console.log("gotten succesfully");
+          return res.json(data[0]);
+       }else{
+           res.status(400)
+           res.json({
+               success:false,
+               message:"item not gotten"
+           })
+       }
+   });
+}             
+                                
+//  } else{z
+//     console.log("you do not have permission to perform this operation")
+//        }
+
+});
+// End point to view all item or get a simgle item based on query
+router.get('/items', (req, res) =>{
+   
+    name = req.query.ItemName;
+    offset= req.query.OffSet;
+    console.log("mogbe")
+     console.log(offset)
+    if(!offset){
+       offset = 0;
+    }
+    
+   console.log(JSON.stringify(req.user));
+   console.log("shina")
+ 
+//  if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){
+
+if(!name){
+    GetItemsMobile()
+    .then(data => {
+       if (data.length>0){
+          console.log("gotten succesfully sumbo");
+          console.log(data[0].length);
+
           return res.json(data[0]);
        }else{
            res.status(400)
@@ -632,13 +722,7 @@ router.put('/chooseprefferedprice/:Item_Id',  (req, res)=>{
     DealersAddress =req.body.DealersAddress;
     DealerPhone = req.body.DealerPhone;
     Price = req.body.Price;
-    DealersName = req.body.DealersName
-   
-   console.log(City)
-   console.log(SellerWeblink)
-   console.log(DealersAddress)
-   console.log(DealerPhone)
-   console.log(Price)
+    DealersName = req.body.DealersName;
    console.log(DealersName)
     Id= req.params.Item_Id;
 
@@ -667,6 +751,7 @@ router.put('/price/:Id',  (req, res)=>{
     DealersAddress =req.body.DealersAddress;
     DealerPhone = req.body.DealerPhone;
     Price = req.body.Price;
+    DealersName = req.body.DealersName;
    // DealersName = req.body.DealersName;
     Id= req.params.Id
 
@@ -708,6 +793,23 @@ router.delete ('/price/:Id',  (req, res) =>{
                     });
     
 });
+
+router.get('/lengthitems',   (req, res) =>{       
+    GetItemsLength()
+    .then(data => {
+       if (data.length>0){
+          console.log("gotten itemlength");
+          return res.json(data);
+       }else{
+           res.status(400)
+           res.json({
+               success:false,
+               message:"itemlength not gotten"
+           })
+       }
+   });
+
+    });
     
 
 module.exports = router; 

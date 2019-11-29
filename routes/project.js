@@ -8,7 +8,7 @@ var mysqlConnection = mysql.createConnection({
     host:'localhost',
     user:'root',
     password:'',
-    database: 'procost'
+    database: 'procostorig'
   })
 
 // end point to create A NEW PROJECT
@@ -72,7 +72,7 @@ var mysqlConnection = mysql.createConnection({
           ParentComponent_Id = Item[i].component_Id;
           Quantity = Item[i].Quantity;
 
-          mysqlConnection.query('SELECT * FROM itemcategory WHERE  Item_Id =?',[Item_Id], function(err, results, response){
+mysqlConnection.query('SELECT * FROM itemcategory WHERE  Item_Id =?',[Item_Id], function(err, results, response){
             if (!err){
             console.log("come up");
            console.log(results.length)
@@ -312,7 +312,43 @@ console.log(JSON.stringify(req.user));
 
 
 
+// end point to get all items in categories in a project
+router.get('/project/category/items/:category/:Project_Id', (req, res) =>{ 
+  console.log(JSON.stringify(req.user)); 
+  var TotalPrice1 = 0;
+  // if(req.user[0].Role_Id == 1 || req.user[0].Role_Id == 5 || req.user[0].Role_Id == 10){                    
+            mysqlConnection.query('SELECT * from itemtemplate LEFT JOIN  projectitemcategory ON  itemtemplate.Item_Id = projectitemcategory.Item_Id WHERE  projectitemcategory.Category_Name =? and  projectitemcategory.Project_Id =? ',[req.params.category, req.params.Project_Id], function(err, results, response){
+                if (!err){
+                  console.log(TotalPrice1)
+                  for(var i = 0; i < results.length; i++){
+                    TotalPrice1 = TotalPrice1 + parseInt(results[i].PrefferedPrice)
+                }
+              console.log("boom")
+              console.log(TotalPrice1)
+              results.totalprice =  TotalPrice1;
+              return res.status(201).json(
+                results
 
+              );
+                
+                      }
+                else{
+                  console.log(err);
+                }
+               
+                }); 
+
+            
+           
+  
+    
+     
+                               
+  // } else{
+  //   console.log("you do not have permission to perform this operation")
+  //      }
+  
+  });
 
 
 

@@ -26,7 +26,7 @@ var mysqlConnection = mysql.createConnection({
     host:'localhost',
     user:'root',
     password:'',
-    database: 'procost'
+    database: 'procostorig'
   })
   //connecting to database
   mysqlConnection.connect((err) => {
@@ -65,7 +65,7 @@ var mysqlConnection = mysql.createConnection({
    // Function to get the number of all projects in the database
    async function GetAll(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
         const myData = [];
         const result = await  connection.execute('SELECT COUNT(Id) AS NumberOfProjects FROM project ')
@@ -89,7 +89,7 @@ var mysqlConnection = mysql.createConnection({
 // Function to get all category
 async function GetCategories(){
     const mysql2= require('mysql2/promise');
-    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procost'});
+    const connection = await mysql2.createConnection({host:'localhost', user: 'root', database: 'procostorig'});
     try{ 
         const result = await connection.execute('SELECT category FROM category')
         console.log("gotten succesfullly")

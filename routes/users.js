@@ -12,7 +12,7 @@ var mysqlConnection = mysql.createConnection({
     host:'localhost',
     user:'root',
     password:'',
-    database: 'procost'
+    database: 'procostorig'
   })
 
 
@@ -125,7 +125,7 @@ router.get('/profiless', passport.authenticate('jwt', { session: false}),  (req,
         bcrypt.hash(Password, salt, (err,hash) => {
         if (err) throw err;
         Password=hash;
-        console.log("password hashed" + Password)
+        console.log("password don dey hashed" + Password)
 
 //To check if email already eixts
     mysqlConnection.query('SELECT * from credential WHERE Email =?', [Email], function(error,results,fields){
@@ -150,11 +150,11 @@ if (!error){
 //          file.mv('public/images/users_images/'+Image);
 //      }
   
-   mysqlConnection.query("insert into user (FirstName, LastName,  Location, Email, PhoneNumber, Address, Role_Id,  Role, Image) values ('"+FirstName+"','"+LastName+"', '"+Location+"','"+Email+"','"+PhoneNumber+"', '"+Address+"','"+roleId+"', '"+Role+"', '"+Image+"')", function(err,results,fields){
+   mysqlConnection.query("insert into user (FirstName, LastName,  Location, Email, PhoneNumber, Address, Role_Id,  Role) values ('"+FirstName+"','"+LastName+"', '"+Location+"','"+Email+"','"+PhoneNumber+"', '"+Address+"','"+roleId+"', '"+Role+"')", function(err,results,fields){
     console.log(FirstName);
     if (!err){
         userId = results.insertId;
-        mysqlConnection.query("insert into credential (Email, Password, Role_Id, User_Id, Image) values ('"+Email+"','"+Password+"','"+roleId+"','"+userId+"', '"+Image+"')", (err)=>{
+        mysqlConnection.query("insert into credential (Email, Password, Role_Id, User_Id) values ('"+Email+"','"+Password+"','"+roleId+"','"+userId+"')", (err)=>{
             console.log("db pass" + Password);
             if (!err){
             res.status(201)
@@ -264,12 +264,13 @@ router.get('/user/:Id',  (req, res)=>{
 
 
 
-// End point to edit and update  a user
+// End point to edit and update  a user by an Admin
 router.put('/user/role/:Id',  (req, res)=>{
 
     mysqlConnection.query('SELECT Role_Id FROM role WHERE Role =?', [req.body.Role], function(error,results,fields){
                 console.log(req.body.Role)
-        console.log(results[0])
+                console.log( req.body.LastName)
+        console.log("ggg")
         roleId = results[0].Role_Id;
     mysqlConnection.query("UPDATE user SET FirstName='"+req.body.FirstName+"', LastName='"+req.body.LastName+"', Location= '"+req.body.Location+"', Email= '"+req.body.Email+"', PhoneNumber='"+req.body.PhoneNumber+"', Address='"+req.body.Address+"', Role='"+req.body.Role+"', Role_Id='"+roleId+"' WHERE Id=?",[req.params.Id], (err, results, fields) =>{       
             if (!err){
@@ -302,7 +303,7 @@ router.put('/user/role/:Id',  (req, res)=>{
 });  
 
 
-// End point to edit and update  a user
+// End point to edit and update  a user by him or herself
 router.put('/user',  (req, res)=>{
     const random = Math.random().toString(36).slice(-8);
     mysqlConnection.query('SELECT Role_Id FROM role WHERE Role =?', [req.body.Role], function(error,results,fields){
@@ -314,6 +315,7 @@ router.put('/user',  (req, res)=>{
             }
              else{
                  file = req.files.Image;
+                 console.log(file)
                  Image = random+req.files.Image.name;
                  file.mv('public/images/users_images/'+Image);
                  console.log(Image)
@@ -347,6 +349,50 @@ router.put('/user',  (req, res)=>{
     });
     
 }); 
+
+//special end point to update image alone
+// router.put('/user/image/one/:Id',  (req, res)=>{
+//     const random = Math.random().toString(36).slice(-8);
+   
+//         if (!req.files){
+//             Image = ""
+//             }
+//              else{
+//                file = req.files.file;
+//                console.log(file)
+//                  Image = random+req.files.file.name;
+//                  file.mv('public/images/users_images/'+Image);
+//                  console.log(Image)
+//              }
+//     mysqlConnection.query("UPDATE user SET Image='"+Image+"' WHERE Id=?",[req.params.Id], (err, results, fields) =>{       
+//             if (!err){
+//                 console.log("jjjj");
+                
+//                 mysqlConnection.query("UPDATE credential SET Image='"+Image+"' WHERE User_Id=?",[req.params.Id], (err, results, fields) =>{ 
+//                     if (!err){
+//                     res.status(201)
+//                     res.send("user updated succesfully")
+//                     res.end()
+                    
+//                     }
+//                     else{
+//                         console.log(err);
+//                     }
+                    
+//                     });
+//                   }
+          
+//             else{
+//                 res.send('unsuccessful');
+//                 console.log(err);
+//             }
+           
+//         });
+
+        
+//     // });
+    
+// });
 
 
 

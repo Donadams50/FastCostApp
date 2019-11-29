@@ -8,7 +8,7 @@ var mysqlConnection = mysql.createConnection({
     host:'localhost',
     user:'root',
     password:'',
-    database: 'procost'
+    database: 'procostorig'
   })
 
   router.get('/profile', passport.authenticate('jwt', { session: false}),  (req, res) =>{
@@ -41,7 +41,7 @@ mysqlConnection.query("insert into componenttemplate ( ComponentName, ComponentD
    // res.status(201).send('success');
        const  component_Id = results.insertId;
        const itemLength =  Item.length;
-       console.log(results);
+       console.log(component_Id);
        mysqlConnection.query('SELECT * FROM componenttemplate WHERE  Id =?',[component_Id ], function(err,results,fields){
       
         if (!err){
@@ -211,20 +211,20 @@ router.get('/component/item/:component_Id',    (req, res) =>{
 });
 
 // End point to remove item from component
-router.delete('/components/item/:Id',   (req, res) =>{
-mysqlConnection.query('DELETE FROM componentitemtemplat WHERE Id =?',[Id], function(err,results,fields){    
-  if (!err){
-    console.log(results);
-    console.log("ffff");
-      res.status(201)
-             return res.json(results);
-      }
-  else{
-    console.log(err);
-  }
+// router.delete('/components/item/:Id',   (req, res) =>{
+// mysqlConnection.query('DELETE FROM componentitemtemplat WHERE Id =?',[Id], function(err,results,fields){    
+//   if (!err){
+//     console.log(results);
+//     console.log("ffff");
+//       res.status(201)
+//              return res.json(results);
+//       }
+//   else{
+//     console.log(err);
+//   }
   
-  });
-});
+//   });
+// });
 // to add new item to a component
 router.put('/component/items/:component_Id', (req, res) =>{
    //console.log(req.user)
@@ -237,13 +237,37 @@ router.put('/component/items/:component_Id', (req, res) =>{
         Item = req.body.Item;
         const itemLength =  Item.length;
         component_Id = req.params.component_Id;
+        mysqlConnection.query('DELETE FROM componentitemtemplate WHERE component_Id =?',[component_Id], function(err,results,fields){    
+          if (!err){
+            console.log(results);
+            console.log("ffff");
+              }
+          else{
+            console.log(err);
+          }
+          
+          });
+         
        
    mysqlConnection.query("UPDATE componenttemplate SET ComponentDescription='"+ComponentDescription+"', ComponentName='"+ComponentName+"', NoOfItems ='"+NoOfItems+"' WHERE Id=?",[component_Id],function(err,results,fields){
            if (!err){
          console.log("Succesfully inserted " );
       // res.status(201).send('success');
           //console.log(component_Id);
-          var TotalPrice = 0;
+          mysqlConnection.query('SELECT * FROM componenttemplate WHERE  Id =?',[component_Id ], function(err,results,fields){
+      
+            if (!err){
+              console.log(results);
+
+                  const  ComponentName = results[0].ComponentName;
+                    console.log(ComponentName);
+                }
+            else{
+              console.log(err);
+            }
+            
+            });
+             var TotalPrice = 0;
         for(j=0; j < itemLength; j++){
          Item_Id = Item[j].Item_Id;
          Id = Item[j].Id;
@@ -259,40 +283,21 @@ router.put('/component/items/:component_Id', (req, res) =>{
          Quantity =Item[j].Quantity;
         TotalPrice = TotalPrice + parseInt(Item[j].PrefferedPrice) * parseInt(Item[j].Quantity);
 
-         mysqlConnection.query('SELECT * FROM componentitemtemplate WHERE  Id =?',[Id], function(err, results, response){
+        mysqlConnection.query("insert into componentitemtemplate ( Item_Id, ItemName, ItemDescription,Image, PrefferedPrice, DealersAddress, DealerPhone, City, SellerWeblink, date, component_Id, ComponentName, Quantity) values ('"+Item_Id+"','"+ItemName+"', '"+ItemDescription+"', '"+Image+"', '"+PrefferedPrice+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+City+"', '"+SellerWeblink+"', '"+date+"', '"+component_Id+"', '"+ ComponentName+"','"+Quantity+"')", function(err,results,fields){
+
           if (!err){
-            const len = results.length;
-       if( len > 0) {  
-        console.log("ori e " );
-         console.log(results.length)
-       
-       } 
-        else{
-          console.log("imu e " );
-         console.log(results.length)
-          mysqlConnection.query("insert into componentitemtemplate ( Item_Id, ItemName, ItemDescription,Image, PrefferedPrice, DealersAddress, DealerPhone, City, SellerWeblink, date, component_Id, ComponentName, Quantity) values ('"+Item_Id+"','"+ItemName+"', '"+ItemDescription+"', '"+Image+"', '"+PrefferedPrice+"', '"+DealersAddress+"', '"+DealerPhone+"', '"+City+"', '"+SellerWeblink+"', '"+date+"', '"+component_Id+"', '"+ComponentName+"',  '"+Quantity+"')", function(err,results,fields){
-
-            if (!err){
-              console.log("Succesfully inserted " );
-            
-                }
-            else
-        
-           // return res.status(400).send('unsucess');
-            console.log(err);
-            });
-
-
-        }
-       
-                }
-          else{
-            console.log(err);
-          }
-         
+            console.log("Succesfully inserted " );
+          
+              }
+          else
+      
+         // return res.status(400).send('unsucess');
+          console.log(err);
           });
 
             }
+          
+         
    mysqlConnection.query("UPDATE componenttemplate SET TotalCost ='"+TotalPrice+"' WHERE Id=?",[component_Id], function(err,results,fields){
 
               if (!err){
